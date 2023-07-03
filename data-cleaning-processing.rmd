@@ -125,7 +125,7 @@ comment1_df<- comment1_df %>%
 
 ```{r}
 comment1_df<- comment1_df %>%
-  mutate(year=2018) %>%
+  mutate(year=2017) %>%
   select(year, commentid=documentId, form_letter=dup_comment_num, org_type, comment=commentText, stance_1, stance_2, stance_1_cat3)
 ```
 
