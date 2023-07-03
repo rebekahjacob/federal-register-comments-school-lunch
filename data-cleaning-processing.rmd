@@ -1,0 +1,215 @@
+---
+title: 'Part 1: Data Cleaning'
+author: "Rebekah Jacob"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message=FALSE,
+                      warning=FALSE)
+```
+
+```{r}
+library(openxlsx)
+library(tidyverse)
+```
+
+# First comment df
+```{r}
+comment1_df<- read.xlsx("../First comment review/completed comments.xlsx") %>%
+  select(-Column1)
+
+head(comment1_df %>%
+       select(-commentText))
+nrow(comment1_df)
+names(comment1_df)
+
+```
+# Second comment df
+```{r}
+comment2_df<- read.xlsx("../Second comment review/FNS-2020-0038_FOR_CODING_10.10.2022.xlsx") %>%
+  select(-X12, -X13)
+
+head(comment2_df %>%
+       select(-comment))
+nrow(comment2_df)
+names(comment2_df)
+```
+
+
+# First cleaning
+## to lower stance and org_type
+In the first round, broadened milk options, half whole-grain, more time for sodium reduction.
+
+Most do NOT want these flexibilities "maintain current regulations".
+```{r}
+comment1_df<- comment1_df %>%
+  mutate(stance_1=tolower(stance_1),
+         org_type=tolower(org_type))
+
+comment1_df %>%
+  group_by(stance_1) %>%
+  tally()
+```
+
+## Create new smaller categories for stance_1
+```{r}
+comment1_df<- comment1_df %>%
+  mutate(stance_1_cat3=factor(case_when(
+    stance_1=="maintain current regulations"~"In favor of original HHFKA",
+    stance_1 %in% c("implement some of the new rules", "do implement new rules")~"In favor of flexibilies",
+    TRUE ~ "Other"), levels=c("In favor of original HHFKA", "In favor of flexibilies", "Other")))
+```
+
+
+## Assign constituent
+
+A few form letters are from orgs, so we'll weed those out when we assign the rest of form letters to constituents
+```{r}
+nrow(
+  comment1_df %>%
+  filter(!is.na(dup_comment_num) & !is.na(organization_new))
+)
+```
+
+Looks like we need to code N=5627.
+```{r}
+nrow(
+  comment1_df %>%
+  filter(!is.na(dup_comment_num) & is.na(organization_new))
+)
+```
+
+
+```{r}
+
+comment1_df %>%
+  group_by(org_type) %>%
+  tally()
+
+
+comment1_df<- comment1_df %>%
+  mutate(org_type=case_when(
+    is.na(org_type) & is.na(organization_new)~"constituent",
+    TRUE ~ as.character(org_type)
+  ))
+
+
+
+         
+comment1_df %>%
+  group_by(org_type) %>%
+  tally()
+```
+
+
+## Factorize org
+```{r}
+comment1_df<- comment1_df %>%
+  mutate(org_type=factor(org_type, levels = c(
+    "academic researchers",
+    "advocacy",
+    "constituent",
+    "manufacturer/food industry",
+    "school",
+    "other government agency - (non school)",
+    "other"
+    
+  )))
+```
+
+
+## clean up var names
+
+```{r}
+comment1_df<- comment1_df %>%
+  mutate(year=2018) %>%
+  select(year, commentid=documentId, form_letter=dup_comment_num, org_type, comment=commentText, stance_1, stance_2, stance_1_cat3)
+```
+
+
+
+# Second cleaning
+
+In the second round, they propose to roll-back standards again.
+
+Most do NOT want these flexibilities "do not restore flexibilites"
+
+```{r}
+
+comment2_df<- comment2_df %>%
+  mutate(stance_1=tolower(stance_1),
+         org_type=tolower(org_type))
+
+comment2_df %>%
+  group_by(stance_1) %>%
+  tally()
+```
+
+```{r}
+comment2_df %>%
+  group_by(org_type) %>%
+  tally()
+```
+
+
+## Assign form letter info
+```{r}
+comment2_df<- comment2_df %>%
+  mutate(form_letter=case_when(
+    grepl("It is not productive to railroad this damaging rule through with only a 30-day comment period over the holidays", comment)~"Form 1a",
+    grepl("It is harmful to railroad this damaging rule through with only a 30-day comment period over the holidays", comment)~"Form 1b",
+    grepl("About 1 in 3 Latino families live in poverty and 1 in 4 are food insecure", comment)~"Form 2- Salud America!",
+    grepl("Students discard the fat-free and low-fat milk then buy drinks devoid of nutrition and sweetened with a combination of high fructose corn syrup and artificial sweetener", comment)~"Form 3"
+    ))
+```
+
+## Create new smaller categories for stance_1
+```{r}
+comment2_df<- comment2_df %>%
+  mutate(stance_1_cat3=factor(case_when(
+    stance_1=="do not restore flexibilities"~"In favor of original HHFKA",
+    stance_1 %in% c("restore all flexibilities", "restore some of the flexibilities")~"In favor of flexibilies",
+    TRUE ~ "Other"), levels=c("In favor of original HHFKA", "In favor of flexibilies", "Other")))
+```
+
+
+## Factorize org
+```{r}
+comment2_df<- comment2_df %>%
+  mutate(org_type=factor(org_type, levels = c(
+    "academic researchers",
+    "advocacy",
+    "constituent",
+    "manufacturer/food industry",
+    "school",
+    "other government agency - (non school)",
+    "other"
+    
+  )))
+```
+
+## clean up var names
+```{r}
+
+comment2_df<- comment2_df %>%
+  mutate(year=2020) %>%
+  select(year, commentid=commentId, form_letter, org_type, comment, stance_1, stance_2, stance_1_cat3)
+
+```
+
+
+
+# Write clean sets for analysis
+```{r}
+write.csv(comment1_df, "first-round-comments.csv")
+write_rds(comment1_df, "first-round-comments.rds")
+
+
+write.csv(comment2_df, "second-round-comments.csv")
+write_rds(comment2_df, "second-round-comments.rds")
+```
+
+

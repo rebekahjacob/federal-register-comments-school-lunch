@@ -1,0 +1,153 @@
+---
+title: 'School Lunch Flexibilities: Federal Register Comments Analysis'
+author: "Rebekah Jacob"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning=FALSE)
+```
+
+
+```{r}
+library(tidyverse)
+library(ggthemr)
+ggthemr("light")
+library(arsenal)
+```
+
+```{r}
+com1df<- readRDS("first-round-comments.rds")
+
+com2df<- readRDS("second-round-comments.rds")
+```
+
+
+# Introduction
+
+This data was extracted from the Federal Register. Extensive cleaning was performed on the data to remove true duplicates and identify form letters. Organization names were coded into `org_type` from both the organization description and/or if revealed within the comment during the coding process.
+
+Form letters (`form_letter`) were identified and sources were determined if available.
+
+# Description {.tabset .tabset-pills}
+
+## 2017
+```{r results='asis'}
+
+# controls for all Tableby tables throughout
+mycontrols  <- tableby.control(test=FALSE, numeric.stats = c("meanCI"), digits=2L, cat.stats = c("countpct"))
+
+
+mylabels <- list(org_type="Organization type",
+                 stance_1="Main stance (coded comment)",
+                 form_letter="Form letter source",
+                 stance_1_cat3="Main stance (coded comment into 3 categories)")
+
+
+desc1_tbl <- tableby(~
+                    org_type +
+                      stance_1 +
+                      form_letter, data=com1df, control=mycontrols)
+
+summary(desc1_tbl, labelTranslations = mylabels, pfootnote=TRUE)
+```
+
+## 2020
+```{r results='asis'}
+desc2_tbl <- tableby(~
+                    org_type +
+                      stance_1 +
+                      form_letter, data=com2df, control=mycontrols)
+
+summary(desc2_tbl, labelTranslations = mylabels, pfootnote=TRUE)
+```
+
+# Support for flexibilities {.tabset .tabset-pills}
+## 2017 {.tabset .tabset-pills}
+### Table
+```{r results='asis'}
+support1_tbl <- tableby(org_type~
+                    stance_1_cat3, data=com1df, control=mycontrols)
+
+summary(support1_tbl, labelTranslations = mylabels, pfootnote=TRUE)
+```
+
+
+### Figure 
+```{r fig.height=6}
+com1df %>%
+  group_by(org_type, stance_1_cat3, .drop=FALSE) %>%
+  summarise(n=n()) %>%
+  group_by(org_type) %>%
+  filter(org_type!="other") %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot() +
+  geom_col(aes(y=pct, x = stance_1_cat3, fill = stance_1_cat3), position="dodge") +
+  labs (x = "", y = "Percentage", fill=" ") +
+  geom_text(aes(y=pct, x = stance_1_cat3, label=paste0(round(pct*100, 0), "%"), group=org_type), position = position_dodge(0.9), vjust=1.2, size=3, color="white") +
+  scale_y_continuous(labels=scales::percent_format()) + 
+    theme(legend.position="bottom", axis.ticks.x=element_blank(), axis.text.x=element_blank()) +
+  facet_wrap(~org_type, nrow=2, scale="free_x", labeller = labeller(org_type = label_wrap_gen(width = 25))) +
+  ggtitle("Stance by organization type, 2017")
+
+```
+
+## 2020 {.tabset .tabset-pills}
+### Table
+```{r results='asis'}
+support2_tbl <- tableby(org_type~
+                    stance_1_cat3, data=com2df, control=mycontrols)
+
+summary(support2_tbl, labelTranslations = mylabels, pfootnote=TRUE)
+```
+
+
+### Figure
+```{r fig.height=6}
+com2df %>%
+  group_by(org_type, stance_1_cat3, .drop=FALSE) %>%
+  summarise(n=n()) %>%
+  group_by(org_type) %>%
+  filter(org_type!="other") %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot() +
+  geom_col(aes(y=pct, x = stance_1_cat3, fill = stance_1_cat3), position="dodge") +
+  labs (x = "", y = "Percentage", fill=" ") +
+  geom_text(aes(y=pct, x = stance_1_cat3, label=paste0(round(pct*100, 0), "%"), group=org_type), position = position_dodge(0.9), vjust=1.2, size=3, color="white") +
+  scale_y_continuous(labels=scales::percent_format()) + 
+    theme(legend.position="bottom", axis.ticks.x=element_blank(), axis.text.x=element_blank()) +
+  facet_wrap(~org_type, nrow=2, scale="free_x", labeller = labeller(org_type = label_wrap_gen(width = 25))) +
+  ggtitle("Stance by organization type, 2020")
+
+```
+
+## Combined figure
+
+```{r fig.height=8, fig.width=10}
+list(com1df, com2df) %>%
+  reduce(full_join) %>%
+  group_by(year, org_type, stance_1_cat3, .drop=FALSE) %>%
+  summarise(n=n()) %>%
+  group_by(year, org_type) %>%
+  filter(org_type!="other") %>%
+  mutate(pct = n/sum(n)) %>%
+  ggplot() +
+  geom_col(aes(y=pct, x = stance_1_cat3, group = year, fill=as.factor(year)), position="dodge") +
+  labs (x = "", y = "Percentage", fill=" ") +
+  geom_text(aes(y=pct, x = stance_1_cat3, label=paste0(round(pct*100, 0), "%"), group=year), position = position_dodge(1), vjust=-.35, size=3, color="black") +
+  scale_y_continuous(labels=scales::percent_format()) + 
+    theme(legend.position="bottom") +
+  scale_x_discrete(labels = scales::wrap_format(15)) +
+  facet_wrap(~org_type, nrow=2, scale="free_x", labeller = labeller(org_type = label_wrap_gen(width = 25))) +
+  ggtitle("Stance by organization type and year")
+```
+
