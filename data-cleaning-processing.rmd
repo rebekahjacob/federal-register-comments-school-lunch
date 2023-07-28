@@ -29,8 +29,7 @@ names(comment1_df)
 ```
 # Second comment df
 ```{r}
-comment2_df<- read.xlsx("../Second comment review/FNS-2020-0038_FOR_CODING_10.10.2022.xlsx") %>%
-  select(-X12, -X13)
+comment2_df<- read.xlsx("../Second comment review/FNS-2020-0038_FOR_CODING_10.10.2022.xlsx")
 
 head(comment2_df %>%
        select(-comment))
