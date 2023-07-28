@@ -45,8 +45,8 @@ In the first round, broadened milk options, half whole-grain, more time for sodi
 Most do NOT want these flexibilities "maintain current regulations".
 ```{r}
 comment1_df<- comment1_df %>%
-  mutate(stance_1=tolower(stance_1),
-         org_type=tolower(org_type))
+  mutate(stance_1=str_to_sentence(stance_1),
+         org_type=str_to_sentence(org_type))
 
 comment1_df %>%
   group_by(stance_1) %>%
@@ -57,8 +57,8 @@ comment1_df %>%
 ```{r}
 comment1_df<- comment1_df %>%
   mutate(stance_1_cat3=factor(case_when(
-    stance_1=="maintain current regulations"~"In favor of original HHFKA",
-    stance_1 %in% c("implement some of the new rules", "do implement new rules")~"In favor of flexibilies",
+    stance_1=="Maintain current regulations"~"In favor of original HHFKA",
+    stance_1 %in% c("Implement some of the new rules", "Do implement new rules")~"In favor of flexibilies",
     TRUE ~ "Other"), levels=c("In favor of original HHFKA", "In favor of flexibilies", "Other")))
 ```
 
@@ -108,13 +108,13 @@ comment1_df %>%
 ```{r}
 comment1_df<- comment1_df %>%
   mutate(org_type=factor(org_type, levels = c(
-    "academic researchers",
-    "advocacy",
-    "constituent",
-    "manufacturer/food industry",
-    "school",
-    "other government agency - (non school)",
-    "other"
+    "Academic researchers",
+    "Advocacy",
+    "Constituent",
+    "Manufacturer/food industry",
+    "School",
+    "Other government agency - (non school)",
+    "Other"
     
   )))
 ```
@@ -139,8 +139,8 @@ Most do NOT want these flexibilities "do not restore flexibilites"
 ```{r}
 
 comment2_df<- comment2_df %>%
-  mutate(stance_1=tolower(stance_1),
-         org_type=tolower(org_type))
+  mutate(stance_1=str_to_sentence(stance_1),
+         org_type=str_to_sentence(org_type))
 
 comment2_df %>%
   group_by(stance_1) %>%
@@ -169,8 +169,8 @@ comment2_df<- comment2_df %>%
 ```{r}
 comment2_df<- comment2_df %>%
   mutate(stance_1_cat3=factor(case_when(
-    stance_1=="do not restore flexibilities"~"In favor of original HHFKA",
-    stance_1 %in% c("restore all flexibilities", "restore some of the flexibilities")~"In favor of flexibilies",
+    stance_1=="Do not restore flexibilities"~"In favor of original HHFKA",
+    stance_1 %in% c("Restore all flexibilities", "Restore some of the flexibilities")~"In favor of flexibilies",
     TRUE ~ "Other"), levels=c("In favor of original HHFKA", "In favor of flexibilies", "Other")))
 ```
 
@@ -179,13 +179,13 @@ comment2_df<- comment2_df %>%
 ```{r}
 comment2_df<- comment2_df %>%
   mutate(org_type=factor(org_type, levels = c(
-    "academic researchers",
-    "advocacy",
-    "constituent",
-    "manufacturer/food industry",
-    "school",
-    "other government agency - (non school)",
-    "other"
+    "Academic researchers",
+    "Advocacy",
+    "Constituent",
+    "Manufacturer/food industry",
+    "School",
+    "Other government agency - (non school)",
+    "Other"
     
   )))
 ```
