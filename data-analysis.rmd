@@ -138,7 +138,7 @@ list(com1df, com2df) %>%
   group_by(year, org_type, stance_1_cat3, .drop=FALSE) %>%
   summarise(n=n()) %>%
   group_by(year, org_type) %>%
-  filter(org_type!="other") %>%
+  filter(org_type!="Other") %>%
   mutate(pct = n/sum(n)) %>%
   ggplot() +
   geom_col(aes(y=pct, x = stance_1_cat3, group = year, fill=as.factor(year)), position="dodge") +
@@ -147,7 +147,9 @@ list(com1df, com2df) %>%
   scale_y_continuous(labels=scales::percent_format()) + 
     theme(legend.position="bottom") +
   scale_x_discrete(labels = scales::wrap_format(15)) +
-  facet_wrap(~org_type, nrow=2, scale="free_x", labeller = labeller(org_type = label_wrap_gen(width = 25))) +
-  ggtitle("Stance by organization type and year")
+  facet_wrap(~org_type, nrow=2, scale="free_x", labeller = labeller(org_type = label_wrap_gen(width = 27)))
+
+ggsave("Figure 1. Stance by organization and year.pdf")
 ```
+
 
