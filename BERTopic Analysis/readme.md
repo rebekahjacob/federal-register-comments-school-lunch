@@ -21,7 +21,8 @@ Data contains all the neccessary data used in the analysis.
 # requirements
 
 ### Compute requirements
-One GPU of at least 12GB of VRAM 
+- One GPU of at least 12GB of VRAM
+- Python version >=3.10
 
 The following packages are required
 ### Required Packages
