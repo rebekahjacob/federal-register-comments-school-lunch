@@ -37,9 +37,10 @@ The following packages are required
 9. **UMAP** - `umap-learn`
 10. **Plotly** - `plotly`
 11. **Plotly.colors** - `plotly.colors` (accessed within `plotly`)
+12. **nbformat** - `nbformat`
 
 ```{bash}
-pip install bertopic keybert transformers scikit-learn pandas numpy tqdm umap-learn plotly
+pip install bertopic keybert transformers scikit-learn pandas numpy tqdm umap-learn plotly nbformat
 ```
 
 # Replication
